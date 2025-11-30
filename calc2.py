@@ -1,16 +1,15 @@
-import os
+import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-import asyncio
 
-TOKEN = os.getenv("BOT_TOKEN")  # ← ВАЖНО! Токен должен быть в переменных окружения на Render
+# Вставляем токен прямо в код
+TOKEN = "8487032692:AAEo8Fs7n6h_2KS2O-aaFaxH6CBm5943OiY"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 # Сессии пользователей
 user_data = {}
-
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
@@ -26,7 +25,6 @@ async def start(message: types.Message):
         "Привет! Я калькулятор хлебных единиц 🍞\n"
         "Введите общий вес упаковки (в граммах):"
     )
-
 
 @dp.message()
 async def process(message: types.Message):
@@ -47,7 +45,7 @@ async def process(message: types.Message):
         except:
             return None
 
-    # Отдельная логика для вопроса "Ещё продукт?"
+    # Логика "Ещё продукт?"
     if session.get("ask_more"):
         if text.lower() in ["да", "д", "yes", "y"]:
             session["ask_more"] = False
@@ -68,9 +66,7 @@ async def process(message: types.Message):
             await message.answer("Введите 'да' или 'нет'.")
             return
 
-    # -------------------
-    #    ЭТАП 1: ВЕС
-    # -------------------
+    # ЭТАП 1: ВЕС
     if session["stage"] == "weight":
         val = num()
         if val is None or val <= 0:
@@ -83,9 +79,7 @@ async def process(message: types.Message):
         await message.answer("Введите количество углеводов на 100 г:")
         return
 
-    # -------------------
-    #   ЭТАП 2: УГЛЕВОДЫ
-    # -------------------
+    # ЭТАП 2: УГЛЕВОДЫ
     if session["stage"] == "carbs100":
         val = num()
         if val is None or val < 0:
@@ -98,9 +92,7 @@ async def process(message: types.Message):
         await message.answer("Введите количество штук в упаковке:")
         return
 
-    # -------------------
-    #    ЭТАП 3: ШТУК В УПАКОВКЕ
-    # -------------------
+    # ЭТАП 3: ШТУК В УПАКОВКЕ
     if session["stage"] == "count":
         val = num()
         if val is None or val <= 0:
@@ -120,9 +112,7 @@ async def process(message: types.Message):
         )
         return
 
-    # -------------------
-    #    ЭТАП 4: СКОЛЬКО СЪЕСТЬ
-    # -------------------
+    # ЭТАП 4: СКОЛЬКО СЪЕСТЬ
     if session["stage"] == "eat":
         qty = num()
         if qty is None or qty <= 0:
@@ -150,11 +140,9 @@ async def process(message: types.Message):
         session["stage"] = "wait"
         return
 
-
 async def main():
     print("Бот запущен.")
     await dp.start_polling(bot)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
